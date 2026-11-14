@@ -1,0 +1,43 @@
+# Portfolio 2: Query Processing and Optimisation
+
+## 1. Introduction
+
+This exercise evaluates query processing and optimisation in the PayFlow Nigeria database using PostgreSQL. The practical work focused on examining query execution plans, creating an index, and comparing execution statistics before and after indexing.
+
+## 2. Baseline Query
+
+The following query retrieves transactions associated with a particular source account and sorts the results by transaction date.
+
+```sql
+EXPLAIN ANALYZE
+SELECT *
+FROM transactions
+WHERE from_account_id = 1
+ORDER BY created_at DESC;
+```
+
+The baseline execution plan showed that PostgreSQL used a sequential scan and a sorting operation. The existing index on `from_account_id` was also present in the database.
+
+## 3. Index Optimisation
+
+A composite index was created to support filtering by source account and ordering by transaction date.
+
+```sql
+CREATE INDEX idx_transactions_from_created
+ON transactions (from_account_id, created_at DESC);
+```
+
+The index was verified  PostgreSQL after creation.
+
+
+The post-index execution plan selected a sequential scan rather than the newly created composite index.
+
+## 5. Analysis and Interpretation
+
+The measured execution time decreased from 0.096 ms to 0.049 ms. However, this result should not be interpreted as conclusive evidence that the composite index improved overall query performance.
+
+The dataset was small, and the query returned no rows. PostgreSQL's query planner can reasonably choose a sequential scan when the table is small because using an index may introduce additional overhead.
+
+The difference in planning time also demonstrates that query planning and query execution are separate processes.
+
+A more reliable performance evaluation would require a larger dataset, queries that return representative results, and repeated controlled measurements.
